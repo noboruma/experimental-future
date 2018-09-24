@@ -3,7 +3,7 @@
 namespace experimental {
     namespace {
         /*
-         * Calls either:
+         * Call either:
          * - return s.get_value()
          * - s.get_value(); return;
          */

@@ -36,7 +36,7 @@ namespace experimental {
             };
 
             /*
-             * Calls a given function either:
+             * Call a given function either:
              * - func(...)
              * - func(...).get()
              */
