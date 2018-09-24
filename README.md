@@ -1,1 +1,2 @@
-experimental/future, interface only version.
+Experimental/future custom implementation of continuation.
+
