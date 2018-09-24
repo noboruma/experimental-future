@@ -1,13 +1,23 @@
 #pragma once
 
 #include <algorithm>
+#include <atomic>
+#include <future>
 #include <chrono>
+#include <condition_variable>
+#include <exception>
 #include <functional>
+#include <list>
+#include <memory>
+#include <mutex>
 #include <type_traits>
 
 #include "future_traits.hh"
+#include "shared_state.hh"
 
-namespace experimental {
+namespace experimental
+{
+    using future_status = std::future_status;
 
     template<typename T>
     class promise
@@ -25,6 +35,9 @@ namespace experimental {
             future<T> get_future();
 
             void swap(promise<T> &other) noexcept;
+
+        private:
+            std::shared_ptr<impl::shared_state<T>> _state;
     };
 
     template<>
@@ -43,6 +56,9 @@ namespace experimental {
             future<void> get_future();
 
             void swap(promise<void> &other) noexcept;
+
+        private:
+            std::shared_ptr<impl::shared_state<void>> _state;
     };
 
     template<typename T>
@@ -71,13 +87,24 @@ namespace experimental {
             bool is_ready() const;
 
             /*
-             * use SFINAE to handle "void" case
+             * Relies on SFINAE to handle 'T == void' special case
              */
             template<typename F>
             auto then(F && func) -> future<typename impl::utils::unwrap_future<decltype(func())>::value_type>;
 
             template<typename F>
-            auto then(F && func) -> future<typename impl::utils::unwrap_future<decltype(func(std::declval<T>()))>::value_typ↪e>;
-    };
+            auto then(F && func) -> future<typename impl::utils::unwrap_future<decltype(func(std::declval<T>()))>::value_type>;
 
+        private:
+            future(std::shared_ptr<impl::shared_state<T>> state);
+
+        private:
+            std::shared_ptr<impl::shared_state<T>> _state;
+
+            friend struct experimental::promise<T>;
+            template<typename>
+            friend class experimental::future;
+    };
 }//!experimental
+
+#include "future.hxx"
